@@ -4,7 +4,9 @@
 <p>
 Gatekeeper is a security plugin for MQ and provides a secure way for clients to connect to an MQ queue manager. It uses a client authentication exit module to extend the functionality of MQ to provide a method for JMS and other types of client connections to be authenticated using standard LDAP Simple authentication.
 </p>
+<p>
 The module itself is called a 'security channel exit' and is named libMQAuthLdap. The module is deployed to an MQ server and is used to protect client MQ connections by providing username and password authentication against an enterprises single sign-on (SSO) such as LDAPS or Microsoft's Active Directory.
+</p>
 <p>
 Client passwords are protected during channel authentication by using standard MQ one way SSL encryption. 
 </p>
