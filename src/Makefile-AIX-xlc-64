@@ -1,0 +1,161 @@
+#=======================================================================
+# MQSeries LDAP Security Channel Exit support
+# Name: Make file
+# 
+# Copyright 2014 Queuemetrix Pty Ltd Australia
+# 
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+# 
+#        http://www.apache.org/licenses/LICENSE-2.0
+# 
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#=======================================================================
+
+HBIN     = /var/mqm/exits64
+INSBIN	 = /var/mqm/exits64
+HLIB     = $(HOME)/lib
+LBIN     = /usr/local/bin
+LLIB     = /usr/local/lib
+
+##### AIX ###################################################
+OS       = AIX
+CC       = xlc_r 
+CFLAGS   = -D$(OS) -q64 -e MQStart -bE:exit.exp -bM:SRE \
+		-I./ \
+		-I/usr/mqm/inc \
+		-I~/gatekeeper/openldap/include \
+		-I~/gatekeeper/openssl/include \
+		-L~/gatekeeper/openldap/lib \
+		-L~/gatekeeper/openssl/lib \
+		-L/usr/mqm/lib64
+LDFLAGS  = 	-lmqm_r -lmqmcs_r -lldap_r -lssl -lcrypto -llber
+
+CMD      = libMQAuthLdap
+
+EXE      = libMQAuthLdap
+
+TESTDIR  = .
+
+LIBOBJ   =  
+
+INSTALL  = install -c -o bin 
+
+MAN	     = libMQAuthLdap.man
+
+D_MAN    = /usr/tmp/man
+
+SRC	   = \
+	libMQAuthLdap.c 
+
+OBJ      = \
+	libMQAuthLdap.o 
+
+INCL     = \
+
+MAKE     = Makefile
+
+MISC     = 
+
+DOC      =  
+
+SCRIPTS  = 
+
+TAR      = $(SRC) $(TSTSRC) $(INCL) $(MAN) $(MAKE) $(SCRIPTS) $(MISC)
+
+##### The rules. #####################################################
+
+all:		libMQAuthLdap
+
+force:
+	mv $(HBIN)/libMQAuthLdap $(HBIN)/libMQAuthLdap_x
+	make libMQAuthLdap
+
+# == Build
+
+libMQAuthLdap:	libMQAuthLdap.o LdapAuthenticateUser.o GetProperties.o CheckIPAddress.o GetAddressInfo.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -o libMQAuthLdap \
+	LdapAuthenticateUser.o \
+	GetProperties.o \
+        CheckIPAddress.o \
+        GetAddressInfo.o
+
+libMQAuthLdap.o:	libMQAuthLdap.c
+	$(CC) $(CFLAGS) -c libMQAuthLdap.c
+
+LdapAuthenticateUser.o:	LdapAuthenticateUser.c
+	$(CC) $(CFLAGS) -c LdapAuthenticateUser.c
+
+GetProperties.o:	GetProperties.c
+	$(CC) $(CFLAGS) -c GetProperties.c
+
+CheckIPAddress.o:	CheckIPAddress.c
+	$(CC) $(CFLAGS) -c CheckIPAddress.c
+
+GetAddressInfo.o:	GetAddressInfo.c
+	$(CC) $(CFLAGS) -c GetAddressInfo.c
+
+### Misc dependencies ################################################
+
+setup:
+	-mkdir $(HOME)/DATA
+
+clean:
+	-/bin/rm -f $(EXE)
+	-/bin/rm -f *.o *.tar *.tar.Z *.ba core x* *.uu *.trc *.log
+
+purge:	clean
+	-/bin/rm -f $(EXE)
+
+install:	all
+	-sudo rm -rf $(INSBIN)/$(EXE)
+	-sudo cp $(EXE) $(INSBIN)
+	-sudo chown mqm:mqm $(INSBIN)/$(EXE)
+
+Install:	all
+	$(INSTALL) $(CMD) $(INSBIN)
+
+
+tip:
+	make dist
+	compress $(CMD).tar
+	uuencode < $(CMD).tar.Z > $(CMD).uu
+	/bin/rm $(CMD).tar.Z
+	wc -l $(CMD).uu
+	sum $(CMD).uu
+
+
+pack:
+	-make clean
+	tar cvf $(CMD).tar $(TAR)
+	encr < $(CMD).tar > $(CMD).x
+	/bin/rm -f $(SRC) $(INCL) $(MAKE) $(CMD).tar
+
+
+depend:
+	cp /dev/null x.c
+	for i in ${SRC}; do \
+		(/bin/grep '^#[ 	]*include  *"' x.c $$i | sed \
+			-e '/\.\.\/h/d' \
+			-e 's/:[^"]*"\([^"]*\)".*/: \1/' \
+			-e 's/\.c/\.o/' >>makedep); done
+	echo '/^# DO NOT DELETE THIS LINE/+2,$$d'                   >  eddep
+	echo '$$r makedep'                                          >> eddep
+	echo 'w'                                                    >> eddep
+	cp Makefile Makefile.bak
+	ed - Makefile                                               <  eddep
+	rm eddep makedep x.c
+	echo '# DEPENDENCIES MUST END AT END OF FILE'               >> Makefile
+	echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY'              >> Makefile
+	echo '# see make depend above'                              >> Makefile
+
+# DO NOT DELETE THIS LINE -- make depend uses it
+# IF YOU PUT STUFF HERE IT WILL GO AWAY
+# DEPENDENCIES MUST END AT END OF FILE
+# IF YOU PUT STUFF HERE IT WILL GO AWAY
+# see make depend above
