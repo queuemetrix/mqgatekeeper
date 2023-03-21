@@ -1,6 +1,6 @@
 # mqgatekeeper
 <h2>IBM MQ LDAP and Active Directory Authentication Exit</h2>
-[Queuemetrix Pty Ltd](https://www.queuemetrix.com)
+<h2><a href="https://www.queuemetrix.com">Queuemetrix Pty Ltd</a></h2>
 <h3>Overview</h3>
 <p>
 Gatekeeper is a security plugin for MQ and provides a secure way for clients to connect to an MQ queue manager. It uses a client authentication exit module to extend the functionality of MQ to provide a method for JMS and other types of client connections to be authenticated using standard LDAP Simple authentication.
